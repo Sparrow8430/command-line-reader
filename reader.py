@@ -1,10 +1,8 @@
-#!/usr/bin/env python3
 import os
 import re
 import glob
 
-# === CONFIG ===
-BOOKS_DIR = "books"  # Put .txt files in this folder
+BOOKS_DIR = "books" 
 LINES_PER_PAGE = 25
 os.makedirs(BOOKS_DIR, exist_ok=True)
 
@@ -25,31 +23,24 @@ def detect_chapters(lines):
     for i, line in enumerate(lines):
         stripped = line.strip()
         
-        # Skip empty lines
         if not stripped:
             continue
         
-        # Check if this looks like a chapter heading
         is_chapter = False
         
-        # Pattern 1: All caps line (e.g., "CHAPTER ONE" or "THE PROLOGUE")
         if len(stripped) > 5 and stripped.isupper() and len(stripped.split()) >= 2:
             words = stripped.split()
-            # Avoid false positives like "THE END" alone
             if len(words) >= 2 or any(w in stripped for w in ["CHAPTER", "PART", "BOOK", "PROLOGUE", "EPILOGUE"]):
                 is_chapter = True
         
-        # Pattern 2: "Chapter 1", "Part I", etc.
         if re.match(r'^(Chapter|Part|Book|Section)\s+[IVX\d]+', stripped, re.IGNORECASE):
             is_chapter = True
         
-        # Pattern 3: Roman numerals at start
         if re.match(r'^[IVX]+\.?\s+[A-Z]', stripped):
             is_chapter = True
         
         if is_chapter:
-            # Save previous chapter
-            if i > current_start + 5:  # Must have some content
+            if i > current_start + 5: 
                 chapters.append({
                     'title': current_title,
                     'start': current_start,
@@ -58,7 +49,6 @@ def detect_chapters(lines):
             current_title = stripped
             current_start = i
     
-    # Add final chapter
     if len(lines) > current_start + 5:
         chapters.append({
             'title': current_title,
@@ -66,7 +56,6 @@ def detect_chapters(lines):
             'end': len(lines)
         })
     
-    # If no chapters detected, treat whole book as one section
     if not chapters:
         chapters = [{'title': 'Full Text', 'start': 0, 'end': len(lines)}]
     
@@ -77,7 +66,6 @@ def load_book(filepath):
     with open(filepath, "r", encoding="utf-8", errors="ignore") as f:
         lines = f.readlines()
     
-    # Skip Project Gutenberg header if present
     start = 0
     for i, line in enumerate(lines):
         if "START OF" in line.upper() and "PROJECT GUTENBERG" in line.upper():
@@ -198,7 +186,7 @@ def read_book(filepath):
                     page -= 1
                 elif chapter_idx > 0:
                     chapter_idx -= 1
-                    page = 999  # Will be capped
+                    page = 999 
             elif cmd == 'c':
                 in_chapter_menu = True
             elif cmd == 's':
